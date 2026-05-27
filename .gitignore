@@ -25,6 +25,3 @@ tests/results/*.json
 # DAGOR_FILES parser is a vendored utility — ignore its build artifacts.
 src/assets/DAGOR_FILES/**/__pycache__/
 src/assets/DAGOR_FILES/**/*.egg-info/
-
-# Large game asset files — re-extract from game files as needed.
-src/assets/MAPS/
