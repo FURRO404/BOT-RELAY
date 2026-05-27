@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Secrets — only .env.example is committed.
+.env
+.env.local
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# test_api_routes.py output — regenerated on every run.
+tests/results/*.json
+!tests/results/.gitkeep
+
+# DAGOR_FILES parser is a vendored utility — ignore its build artifacts.
+src/assets/DAGOR_FILES/**/__pycache__/
+src/assets/DAGOR_FILES/**/*.egg-info/
+
+# Large game asset files — re-extract from game files as needed.
+src/assets/MAPS/
