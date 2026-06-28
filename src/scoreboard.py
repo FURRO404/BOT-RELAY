@@ -45,20 +45,16 @@ def _resolve_asset_root() -> Path:
     """Locate the scoreboard asset bundle.
 
     Preference order:
-    1. Explicit AXBOT_SCOREBOARD_ASSETS_DIR
-    2. Bundled AXBot/src/assets
-    3. The sibling SREBOT asset bundle in the workspace, if present
+    1. Explicit BOT_RELAY_SCOREBOARD_ASSETS_DIR
+    2. Bundled src/assets
     """
 
     candidates: list[Path] = []
-    env_root = os.getenv("AXBOT_SCOREBOARD_ASSETS_DIR", "").strip()
+    env_root = os.getenv("BOT_RELAY_SCOREBOARD_ASSETS_DIR", "").strip()
     if env_root:
         candidates.append(Path(env_root).expanduser())
 
     candidates.append(BASE_DIR / "assets")
-
-    workspace_root = BASE_DIR.parent.parent
-    candidates.append(workspace_root / "SREBOT_MEOW" / "BOT")
 
     def _is_ready(root: Path) -> bool:
         return (

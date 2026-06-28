@@ -35,42 +35,70 @@ load_dotenv(ROOT_DIR / ".env")
 
 OUT = Path(__file__).resolve().parent / "results"
 OUT.mkdir(parents=True, exist_ok=True)
-REMOTE = os.getenv("SREBOT_API_BASE_URL", "http://localhost:18081").rstrip("/")
-TOKEN = os.getenv("SREBOT_API_BEARER_TOKEN", "")
-LOCAL = os.getenv("AXBOT_RECEIVER_URL", "http://127.0.0.1:18081").rstrip("/")
+REMOTE = os.getenv("RELAY_GATEWAY_URL", "http://localhost:18081").rstrip("/")
+TOKEN = os.getenv("RELAY_TOKEN", "")
+LOCAL = os.getenv("BOT_RELAY_RECEIVER_URL", "http://127.0.0.1:18082").rstrip("/")
 
 UID = "96182901"
 SID = "69057ae000a84f4"
 NICK = "NotSoGroomless"
 SQUAD = "DSPL"
+TSS_UID = "148919027"
+TSS_SID = "6bb555e001649cf"
+TSS_TOURNEY = "24839"
 
 # (file_stem, base, path, params)
 TARGETS: list[tuple[str, str, str, dict[str, Any] | None]] = [
-    # --- AXBot receiver (local) ---
-    ("axbot_health", LOCAL, "/health", None),
-    ("axbot_srebot_stats", LOCAL, "/api/srebot/stats", None),
-    ("axbot_srebot_latest", LOCAL, "/api/srebot/latest", None),
-    ("axbot_srebot_events", LOCAL, "/api/srebot/events", {"limit": 5}),
+    # --- BOT-RELAY receiver (local), namespaced by channel ---
+    ("relay_health", LOCAL, "/health", None),
+    ("relay_sqb_stats", LOCAL, "/api/sqb/stats", None),
+    ("relay_sqb_latest", LOCAL, "/api/sqb/latest", None),
+    ("relay_sqb_events", LOCAL, "/api/sqb/events", {"limit": 5}),
+    ("relay_tss_stats", LOCAL, "/api/tss/stats", None),
+    ("relay_tss_latest", LOCAL, "/api/tss/latest", None),
+    ("relay_tss_events", LOCAL, "/api/tss/events", {"limit": 5}),
 
-    # --- SREBOT endpoints AXBot wraps in srebot_client.py ---
-    ("api_info", REMOTE, "/api/info", None),
-    ("api_live", REMOTE, "/api/live", None),
-    ("api_player_uid", REMOTE, f"/api/player/{UID}", None),
-    ("api_player_uid_games", REMOTE, f"/api/player/{UID}/games", {"limit": 5}),
-    ("api_player_uid_history", REMOTE, f"/api/player/{UID}/history", None),
-    ("api_search_nickname", REMOTE, f"/api/search/{NICK}", None),
-    ("api_match_sessionid", REMOTE, f"/api/match/{SID}", None),
-    ("api_match_sessionid_scoreboard", REMOTE, f"/api/match/{SID}/scoreboard", None),
-    ("api_games_search", REMOTE, "/api/games/search", {"player": UID, "limit": 3}),
-    ("api_maps", REMOTE, "/api/maps", None),
-    ("api_seasons", REMOTE, "/api/seasons", None),
-    ("api_squadrons_resolve", REMOTE, "/api/squadrons/resolve", {"short": SQUAD}),
-    ("api_squadrons_name", REMOTE, f"/api/squadrons/{SQUAD}", None),
-    ("api_squadrons_name_comps", REMOTE, f"/api/squadrons/{SQUAD}/comps", {"limit": 5}),
-    ("api_leaderboard_players", REMOTE, "/api/leaderboard/players", {"limit": 3}),
-    ("api_leaderboard_squadrons", REMOTE, "/api/leaderboard/squadrons", {"limit": 3}),
-    ("api_leaderboard_vehicles", REMOTE, "/api/leaderboard/vehicles", {"limit": 3}),
-    ("api_leaderboard_stats", REMOTE, "/api/leaderboard/stats", None),
+    # --- gateway capability ---
+    ("whoami", REMOTE, "/api/whoami", None),
+
+    # --- SQB endpoints (gateway /api/sqb/*) ---
+    ("sqb_info", REMOTE, "/api/sqb/info", None),
+    ("sqb_live", REMOTE, "/api/sqb/live", None),
+    ("sqb_player_uid", REMOTE, f"/api/sqb/player/{UID}", None),
+    ("sqb_player_uid_games", REMOTE, f"/api/sqb/player/{UID}/games", {"limit": 5}),
+    ("sqb_player_uid_history", REMOTE, f"/api/sqb/player/{UID}/history", None),
+    ("sqb_search_nickname", REMOTE, f"/api/sqb/search/{NICK}", None),
+    ("sqb_match_sessionid", REMOTE, f"/api/sqb/match/{SID}", None),
+    ("sqb_match_sessionid_scoreboard", REMOTE, f"/api/sqb/match/{SID}/scoreboard", None),
+    ("sqb_games_search", REMOTE, "/api/sqb/games/search", {"player": UID, "limit": 3}),
+    ("sqb_maps", REMOTE, "/api/sqb/maps", None),
+    ("sqb_seasons", REMOTE, "/api/sqb/seasons", None),
+    ("sqb_squadrons_resolve", REMOTE, "/api/sqb/squadrons/resolve", {"short": SQUAD}),
+    ("sqb_squadrons_name", REMOTE, f"/api/sqb/squadrons/{SQUAD}", None),
+    ("sqb_squadrons_name_comps", REMOTE, f"/api/sqb/squadrons/{SQUAD}/comps", {"limit": 5}),
+    ("sqb_leaderboard_players", REMOTE, "/api/sqb/leaderboard/players", {"limit": 3}),
+    ("sqb_leaderboard_squadrons", REMOTE, "/api/sqb/leaderboard/squadrons", {"limit": 3}),
+    ("sqb_leaderboard_vehicles", REMOTE, "/api/sqb/leaderboard/vehicles", {"limit": 3}),
+    ("sqb_leaderboard_stats", REMOTE, "/api/sqb/leaderboard/stats", None),
+
+    # --- TSS endpoints (gateway /api/tss/*; 501 until the TSS API is deployed) ---
+    ("tss_info", REMOTE, "/api/tss/info", None),
+    ("tss_live", REMOTE, "/api/tss/live", {"limit": 5}),
+    ("tss_player_uid", REMOTE, f"/api/tss/player/{TSS_UID}", None),
+    ("tss_player_uid_games", REMOTE, f"/api/tss/player/{TSS_UID}/games", {"limit": 5}),
+    ("tss_player_uid_history", REMOTE, f"/api/tss/player/{TSS_UID}/history", None),
+    ("tss_search_nickname", REMOTE, f"/api/tss/search/{NICK}", None),
+    ("tss_match_sessionid", REMOTE, f"/api/tss/match/{TSS_SID}", None),
+    ("tss_match_sessionid_scoreboard", REMOTE, f"/api/tss/match/{TSS_SID}/scoreboard", None),
+    ("tss_matches_search", REMOTE, "/api/tss/matches/search", {"player": TSS_UID, "limit": 3}),
+    ("tss_maps", REMOTE, "/api/tss/maps", None),
+    ("tss_leaderboard_players", REMOTE, "/api/tss/leaderboard/players", {"start_date": 1780000000, "end_date": 1790000000, "limit": 3}),
+    ("tss_leaderboard_vehicles", REMOTE, "/api/tss/leaderboard/vehicles", {"tournament_id": TSS_TOURNEY, "limit": 3}),
+    ("tss_leaderboard_stats", REMOTE, "/api/tss/leaderboard/stats", {"start_date": 1780000000, "end_date": 1790000000}),
+    ("tss_tournaments", REMOTE, "/api/tss/tournaments", {"limit": 5}),
+    ("tss_tournament_id", REMOTE, f"/api/tss/tournament/{TSS_TOURNEY}", None),
+    ("tss_tournament_id_standings", REMOTE, f"/api/tss/tournament/{TSS_TOURNEY}/standings", None),
+    ("tss_tournament_id_matches", REMOTE, f"/api/tss/tournament/{TSS_TOURNEY}/matches", None),
 ]
 
 

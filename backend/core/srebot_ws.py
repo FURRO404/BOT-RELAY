@@ -1,12 +1,12 @@
 """
-WebSocket client that connects to SREBOT's external bridge and feeds
-received envelopes into the local in-memory store.
+WebSocket client that connects to the relay gateway's push channels and
+feeds received envelopes into the local in-memory store.
 
-Derives the connection URL from SREBOT_WS_URL if set, otherwise converts
-SREBOT_API_BASE_URL (http/https) to a ws/wss URL and appends /ws/srebot.
-Reconnects with exponential back-off on any error.
+`listen_all()` discovers the granted channels via GET /api/whoami, then runs
+one `listen_channel(channel)` task per channel (`sqb`/`tss`), deriving each
+ws URL from RELAY_GATEWAY_URL. Reconnects with exponential back-off on error.
 
-SREBOT broadcasts envelopes as zstd-compressed binary frames. The
+The gateway broadcasts envelopes as zstd-compressed binary frames. The
 decompressor tries zstd first and falls back to plain UTF-8 so the
 client survives if an uncompressed frame ever arrives.
 """
