@@ -1,48 +1,50 @@
 """
-WebSocket receiver for SREBOT payloads.
+HTTP surface for the BOT-RELAY receiver.
 
-SREBOT connects to this listener and forwards transformed Spectra replay and
-GOB payloads. AXBot stores the raw envelopes in memory and exposes a small
-HTTP surface for later querying.
+The relay connects out to the gateway's `/ws/<channel>` push channels and stores
+the envelopes in memory. These routes expose that in-memory store, namespaced by
+channel (`sqb` / `tss`).
 """
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException
 
 from backend.core.srebot_store import store
+
+_CHANNELS = {"sqb", "tss"}
 
 
 def get_router() -> APIRouter:
     router = APIRouter()
 
+    def _check(channel: str) -> None:
+        if channel not in _CHANNELS:
+            raise HTTPException(status_code=404, detail=f"unknown channel {channel}")
+
     @router.get("/health")
     async def health() -> dict[str, Any]:
-        return {
-            "status": "ok",
-            "listener": "srebot",
-        }
+        return {"status": "ok", "listener": "bot-relay"}
 
-    @router.get("/api/srebot/stats")
-    async def srebot_stats() -> dict[str, Any]:
-        return await store.stats()
+    @router.get("/api/{channel}/stats")
+    async def stats(channel: str) -> dict[str, Any]:
+        _check(channel)
+        return await store.stats(source=channel)
 
-    @router.get("/api/srebot/latest")
-    async def srebot_latest(event_type: str | None = None) -> dict[str, Any]:
-        record = await store.latest(event_type=event_type)
+    @router.get("/api/{channel}/latest")
+    async def latest(channel: str, event_type: str | None = None) -> dict[str, Any]:
+        _check(channel)
+        record = await store.latest(source=channel, event_type=event_type)
         if record is None:
-            raise HTTPException(status_code=404, detail="No SREBOT payloads received yet")
+            raise HTTPException(status_code=404, detail="No payloads received yet")
         return record.to_dict()
 
-    @router.get("/api/srebot/events")
-    async def srebot_events(event_type: str | None = None, limit: int = 100) -> dict[str, Any]:
-        events = await store.list(event_type=event_type, limit=limit)
-        return {
-            "total": len(events),
-            "events": [event.to_dict() for event in events],
-        }
+    @router.get("/api/{channel}/events")
+    async def events(channel: str, event_type: str | None = None, limit: int = 100) -> dict[str, Any]:
+        _check(channel)
+        items = await store.list(source=channel, event_type=event_type, limit=limit)
+        return {"total": len(items), "events": [e.to_dict() for e in items]}
 
     return router
