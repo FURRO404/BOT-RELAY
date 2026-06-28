@@ -8,7 +8,7 @@ its data into whatever you want (text, JSON, scoreboard PNGs, leaderboards,
 alerts, charts — your call).
 
 On startup it connects to the gateway, calls `GET /api/whoami` to discover which
-channels its key is allowed (`sqb` and/or `tss`), opens a `/ws/<channel>` push
+channels its key is allowed (`sre` and/or `tss`), opens a `/ws/<channel>` push
 socket for each, and queries `/api/<channel>/*` on demand. Channels come from the
 key — there is no channel list to configure.
 
@@ -17,7 +17,7 @@ What ships:
 - a **receiver service** that connects out to the gateway's push WebSocket(s),
   receives pushed envelopes the moment a game is processed, stores them in memory
   per channel, and exposes them over REST
-- a **typed async client** for every SREBOT (`sqb`) and TSS (`tss`) HTTP endpoint
+- a **typed async client** for every SREBOT (`sre`) and TSS (`tss`) HTTP endpoint
 - a **scoreboard renderer** that turns a match payload into a PNG
 - a **game-files updater** that refreshes the bundled vehicle icons and VROMFS
   data from upstream War Thunder sources
@@ -53,7 +53,7 @@ don't need.
      and, by deriving `ws://`/`wss://`, the push WebSocket(s).
    - `RELAY_TOKEN` — your client's bearer token. Used for **both** outbound HTTP
      queries and the outbound WebSocket connections. The token's level
-     (`all`/`sqb`/`tss`) decides which channels you receive — the relay
+     (`all`/`sre`/`tss`) decides which channels you receive — the relay
      discovers them automatically via `/api/whoami`.
 
 3. (Optional, recommended once before first deploy) refresh the bundled game
@@ -93,7 +93,7 @@ See `tests/README.md` for what the output means.
 - `backend/api/srebot_bridge.py` — HTTP routes that expose the in-memory store, namespaced by channel
 - `backend/core/gateway_client.py` — `whoami()` + ws-URL derivation
 - `backend/core/srebot_ws.py` — WebSocket client; on startup discovers channels and runs one listener per channel, decompresses zstd binary frames, feeds envelopes into the store
-- `backend/core/srebot_client.py` — typed async HTTP client for `sqb` queries
+- `backend/core/srebot_client.py` — typed async HTTP client for `sre` queries
 - `backend/core/tss_client.py` — typed async HTTP client for `tss` queries
 - `backend/core/srebot_store.py` — in-memory envelope store, namespaced by channel (bounded deque, 5000 entries)
 - `src/scoreboard.py` — renders scoreboard PNGs from match payloads
@@ -119,7 +119,7 @@ See `tests/README.md` for what the output means.
    no envelope needed.
 
 ## Receiver endpoints (what BOT-RELAY serves)
-`<channel>` is `sqb` or `tss`.
+`<channel>` is `sre` or `tss`.
 
 | Method | Path | Purpose |
 |--------|------|---------|
@@ -128,7 +128,7 @@ See `tests/README.md` for what the output means.
 | `GET` | `/api/<channel>/latest?event_type=` | Newest envelope (404 if none yet) |
 | `GET` | `/api/<channel>/events?event_type=&limit=100` | Short history, newest first |
 
-Envelope shape (the `sqb` channel carries SREBOT's `source: "srebot"`; `tss`
+Envelope shape (the `sre` channel carries SREBOT's `source: "srebot"`; `tss`
 carries `source: "tss"`):
 ```json
 {
@@ -151,27 +151,27 @@ helpers in `backend.core.tss_client`. Import-and-go, e.g.
 `from backend.core.srebot_client import fetch_player`, then
 `await fetch_player("96182901")`.
 
-### SQB (`/api/sqb/*`)
+### SQB (`/api/sre/*`)
 | Helper | Path | Returns |
 |---|---|---|
-| `fetch_info()` | `/api/sqb/info` | Capability manifest |
-| `fetch_live(**)` | `/api/sqb/live` | Recent match summaries |
-| `fetch_seasons()` | `/api/sqb/seasons` | Season schedule |
-| `fetch_player(uid, **)` | `/api/sqb/player/{uid}` | Summary + per-vehicle stats + previous_nicks/squadron_names |
-| `fetch_player_games(uid, **)` | `/api/sqb/player/{uid}/games` | Individual battle rows |
-| `fetch_player_history(uid)` | `/api/sqb/player/{uid}/history` | Daily aggregates (days played only) |
-| `fetch_search_players(nickname)` | `/api/sqb/search/{nickname}` | Player search with rename history |
-| `fetch_match(session_id)` | `/api/sqb/match/{session_id}` | Match summary with teams |
-| `fetch_match_scoreboard(session_id)` | `/api/sqb/match/{session_id}/scoreboard` | Render-ready scoreboard context |
-| `fetch_games_search(**)` | `/api/sqb/games/search` | Match search (`player`, `map`, `squadron`, `limit`, `time_from`, `time_to`) |
-| `fetch_maps()` | `/api/sqb/maps` | Distinct map names |
-| `fetch_squadron_resolve(short=, tag=, long=, name=)` | `/api/sqb/squadrons/resolve` | Canonical squadron metadata |
-| `fetch_squadron(name, **)` | `/api/sqb/squadrons/{name}` | Roster + per-player + per-vehicle stats |
-| `fetch_squadron_comps(name, **)` | `/api/sqb/squadrons/{name}/comps` | Recent comp snapshots |
-| `fetch_leaderboard_players(**)` | `/api/sqb/leaderboard/players` | Player leaderboard (date filter REQUIRED) |
-| `fetch_leaderboard_squadrons(**)` | `/api/sqb/leaderboard/squadrons` | Squadron leaderboard |
-| `fetch_leaderboard_vehicles(**)` | `/api/sqb/leaderboard/vehicles` | Vehicle leaderboard (date filter REQUIRED) |
-| `fetch_leaderboard_stats()` | `/api/sqb/leaderboard/stats` | Overall totals + top vehicles |
+| `fetch_info()` | `/api/sre/info` | Capability manifest |
+| `fetch_live(**)` | `/api/sre/live` | Recent match summaries |
+| `fetch_seasons()` | `/api/sre/seasons` | Season schedule |
+| `fetch_player(uid, **)` | `/api/sre/player/{uid}` | Summary + per-vehicle stats + previous_nicks/squadron_names |
+| `fetch_player_games(uid, **)` | `/api/sre/player/{uid}/games` | Individual battle rows |
+| `fetch_player_history(uid)` | `/api/sre/player/{uid}/history` | Daily aggregates (days played only) |
+| `fetch_search_players(nickname)` | `/api/sre/search/{nickname}` | Player search with rename history |
+| `fetch_match(session_id)` | `/api/sre/match/{session_id}` | Match summary with teams |
+| `fetch_match_scoreboard(session_id)` | `/api/sre/match/{session_id}/scoreboard` | Render-ready scoreboard context |
+| `fetch_games_search(**)` | `/api/sre/games/search` | Match search (`player`, `map`, `squadron`, `limit`, `time_from`, `time_to`) |
+| `fetch_maps()` | `/api/sre/maps` | Distinct map names |
+| `fetch_squadron_resolve(short=, tag=, long=, name=)` | `/api/sre/squadrons/resolve` | Canonical squadron metadata |
+| `fetch_squadron(name, **)` | `/api/sre/squadrons/{name}` | Roster + per-player + per-vehicle stats |
+| `fetch_squadron_comps(name, **)` | `/api/sre/squadrons/{name}/comps` | Recent comp snapshots |
+| `fetch_leaderboard_players(**)` | `/api/sre/leaderboard/players` | Player leaderboard (date filter REQUIRED) |
+| `fetch_leaderboard_squadrons(**)` | `/api/sre/leaderboard/squadrons` | Squadron leaderboard |
+| `fetch_leaderboard_vehicles(**)` | `/api/sre/leaderboard/vehicles` | Vehicle leaderboard (date filter REQUIRED) |
+| `fetch_leaderboard_stats()` | `/api/sre/leaderboard/stats` | Overall totals + top vehicles |
 
 ### TSS (`/api/tss/*`)
 TSS is team/tournament-based. There are **no team-keyed endpoints** — team

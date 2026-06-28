@@ -50,7 +50,7 @@ class SREBOTEventStore:
     async def add(self, envelope: dict[str, Any], channel: Optional[str] = None) -> SREBOTEnvelope:
         """Add an inbound envelope and return the stored record.
 
-        ``channel`` is the gateway channel the envelope arrived on (``sqb`` /
+        ``channel`` is the gateway channel the envelope arrived on (``sre`` /
         ``tss``) and becomes the record's ``source`` so the receiver can filter
         by channel. The envelope's own ``source`` field (e.g. ``"srebot"``)
         stays available in ``raw``. Falls back to the envelope source when no

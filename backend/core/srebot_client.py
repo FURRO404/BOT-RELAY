@@ -25,7 +25,7 @@ class SREBOTClient:
     timeout_seconds: float = 30.0
     # ClassVar (not a dataclass field) so subclasses can override the namespace
     # without conflicting with slots.
-    _api_prefix: ClassVar[str] = "/api/sqb"
+    _api_prefix: ClassVar[str] = "/api/sre"
 
     def _headers(self) -> dict[str, str]:
         headers = {"Accept": "application/json"}

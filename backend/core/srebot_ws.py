@@ -3,7 +3,7 @@ WebSocket client that connects to the relay gateway's push channels and
 feeds received envelopes into the local in-memory store.
 
 `listen_all()` discovers the granted channels via GET /api/whoami, then runs
-one `listen_channel(channel)` task per channel (`sqb`/`tss`), deriving each
+one `listen_channel(channel)` task per channel (`sre`/`tss`), deriving each
 ws URL from RELAY_GATEWAY_URL. Reconnects with exponential back-off on error.
 
 The gateway broadcasts envelopes as zstd-compressed binary frames. The

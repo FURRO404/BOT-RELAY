@@ -7,4 +7,4 @@ def test_tss_prefix():
 
 
 def test_sqb_prefix_unchanged():
-    assert SREBOTClient(base_url="http://gw")._api_prefix == "/api/sqb"
+    assert SREBOTClient(base_url="http://gw")._api_prefix == "/api/sre"

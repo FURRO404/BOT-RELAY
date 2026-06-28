@@ -3,7 +3,7 @@ HTTP surface for the BOT-RELAY receiver.
 
 The relay connects out to the gateway's `/ws/<channel>` push channels and stores
 the envelopes in memory. These routes expose that in-memory store, namespaced by
-channel (`sqb` / `tss`).
+channel (`sre` / `tss`).
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 
 from backend.core.srebot_store import store
 
-_CHANNELS = {"sqb", "tss"}
+_CHANNELS = {"sre", "tss"}
 
 
 def get_router() -> APIRouter:
