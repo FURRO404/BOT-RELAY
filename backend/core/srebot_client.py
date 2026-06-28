@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 from urllib.parse import quote
 
 import aiohttp
@@ -23,7 +23,9 @@ class SREBOTClient:
     base_url: str
     bearer_token: str = ""
     timeout_seconds: float = 30.0
-    _api_prefix: str = "/api/sqb"
+    # ClassVar (not a dataclass field) so subclasses can override the namespace
+    # without conflicting with slots.
+    _api_prefix: ClassVar[str] = "/api/sqb"
 
     def _headers(self) -> dict[str, str]:
         headers = {"Accept": "application/json"}
