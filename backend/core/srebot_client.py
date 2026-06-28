@@ -23,6 +23,7 @@ class SREBOTClient:
     base_url: str
     bearer_token: str = ""
     timeout_seconds: float = 30.0
+    _api_prefix: str = "/api/sqb"
 
     def _headers(self) -> dict[str, str]:
         headers = {"Accept": "application/json"}
@@ -39,71 +40,71 @@ class SREBOTClient:
                 return await response.json()
 
     async def info(self) -> Any:
-        return await self._request("/api/info")
+        return await self._request(f"{self._api_prefix}/info")
 
     async def live(self, **params: Any) -> Any:
-        return await self._request("/api/live", params=params or None)
+        return await self._request(f"{self._api_prefix}/live", params=params or None)
 
     async def player(self, uid: str, **params: Any) -> Any:
-        return await self._request(f"/api/player/{quote(str(uid), safe='')}", params=params or None)
+        return await self._request(f"{self._api_prefix}/player/{quote(str(uid), safe='')}", params=params or None)
 
     async def player_games(self, uid: str, **params: Any) -> Any:
-        return await self._request(f"/api/player/{quote(str(uid), safe='')}/games", params=params or None)
+        return await self._request(f"{self._api_prefix}/player/{quote(str(uid), safe='')}/games", params=params or None)
 
     async def player_history(self, uid: str) -> Any:
-        return await self._request(f"/api/player/{quote(str(uid), safe='')}/history")
+        return await self._request(f"{self._api_prefix}/player/{quote(str(uid), safe='')}/history")
 
     async def search_players(self, nickname: str) -> Any:
-        return await self._request(f"/api/search/{quote(str(nickname), safe='')}")
+        return await self._request(f"{self._api_prefix}/search/{quote(str(nickname), safe='')}")
 
     async def match(self, session_id: str) -> Any:
-        return await self._request(f"/api/match/{quote(str(session_id), safe='')}")
+        return await self._request(f"{self._api_prefix}/match/{quote(str(session_id), safe='')}")
 
     async def match_scoreboard(self, session_id: str) -> Any:
-        return await self._request(f"/api/match/{quote(str(session_id), safe='')}/scoreboard")
+        return await self._request(f"{self._api_prefix}/match/{quote(str(session_id), safe='')}/scoreboard")
 
     async def games_search(self, **params: Any) -> Any:
-        return await self._request("/api/games/search", params=params or None)
+        return await self._request(f"{self._api_prefix}/games/search", params=params or None)
 
     async def maps(self) -> Any:
-        return await self._request("/api/maps")
+        return await self._request(f"{self._api_prefix}/maps")
 
     async def seasons(self) -> Any:
-        return await self._request("/api/seasons")
+        return await self._request(f"{self._api_prefix}/seasons")
 
     async def squadron(self, squadron_name: str, **params: Any) -> Any:
-        return await self._request(f"/api/squadrons/{quote(str(squadron_name), safe='')}", params=params or None)
+        return await self._request(f"{self._api_prefix}/squadrons/{quote(str(squadron_name), safe='')}", params=params or None)
 
     async def squadron_resolve(self, **params: Any) -> Any:
-        return await self._request("/api/squadrons/resolve", params=params or None)
+        return await self._request(f"{self._api_prefix}/squadrons/resolve", params=params or None)
 
     async def squadron_comps(self, squadron_name: str, **params: Any) -> Any:
         return await self._request(
-            f"/api/squadrons/{quote(str(squadron_name), safe='')}/comps",
+            f"{self._api_prefix}/squadrons/{quote(str(squadron_name), safe='')}/comps",
             params=params or None,
         )
 
     async def leaderboard_players(self, **params: Any) -> Any:
-        return await self._request("/api/leaderboard/players", params=params or None)
+        return await self._request(f"{self._api_prefix}/leaderboard/players", params=params or None)
 
     async def leaderboard_squadrons(self, **params: Any) -> Any:
-        return await self._request("/api/leaderboard/squadrons", params=params or None)
+        return await self._request(f"{self._api_prefix}/leaderboard/squadrons", params=params or None)
 
     async def leaderboard_vehicles(self, **params: Any) -> Any:
-        return await self._request("/api/leaderboard/vehicles", params=params or None)
+        return await self._request(f"{self._api_prefix}/leaderboard/vehicles", params=params or None)
 
     async def leaderboard_stats(self) -> Any:
-        return await self._request("/api/leaderboard/stats")
+        return await self._request(f"{self._api_prefix}/leaderboard/stats")
 
 
 def default_client() -> SREBOTClient:
     """Build a client from environment variables."""
-    base_url = os.getenv("SREBOT_API_BASE_URL", "").strip()
+    base_url = os.getenv("RELAY_GATEWAY_URL", "").strip()
     if not base_url:
-        raise ValueError("SREBOT_API_BASE_URL must be set to the remote SREBOT server URL")
+        raise ValueError("RELAY_GATEWAY_URL must be set to the relay gateway URL")
     return SREBOTClient(
         base_url=base_url,
-        bearer_token=os.getenv("SREBOT_API_BEARER_TOKEN", ""),
+        bearer_token=os.getenv("RELAY_TOKEN", ""),
     )
 
 
