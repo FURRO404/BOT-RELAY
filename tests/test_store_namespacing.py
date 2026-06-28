@@ -24,3 +24,14 @@ async def test_list_filters_by_source():
     items = await s.list(source="sqb")
     assert len(items) == 1
     assert items[0].source == "sqb"
+
+
+async def test_channel_overrides_envelope_source():
+    # A real SREBOT envelope carries source "srebot" but arrives on the "sqb"
+    # channel; it must be queryable as "sqb" (the receiver namespaces by channel).
+    s = SREBOTEventStore()
+    await s.add({"type": "spectra.replay_batch", "source": "srebot", "payload": {}}, channel="sqb")
+    assert (await s.latest(source="sqb")) is not None
+    assert (await s.latest(source="srebot")) is None
+    rec = await s.latest(source="sqb")
+    assert rec.raw["source"] == "srebot"  # original preserved in raw

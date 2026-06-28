@@ -47,11 +47,18 @@ class SREBOTEventStore:
         self._counter = 0
         self._lock = asyncio.Lock()
 
-    async def add(self, envelope: dict[str, Any]) -> SREBOTEnvelope:
-        """Add an inbound envelope and return the stored record."""
+    async def add(self, envelope: dict[str, Any], channel: Optional[str] = None) -> SREBOTEnvelope:
+        """Add an inbound envelope and return the stored record.
+
+        ``channel`` is the gateway channel the envelope arrived on (``sqb`` /
+        ``tss``) and becomes the record's ``source`` so the receiver can filter
+        by channel. The envelope's own ``source`` field (e.g. ``"srebot"``)
+        stays available in ``raw``. Falls back to the envelope source when no
+        channel is given.
+        """
         event_type = str(envelope.get("type") or "unknown")
         version = int(envelope.get("version") or 1)
-        source = str(envelope.get("source") or "srebot")
+        source = channel or str(envelope.get("source") or "unknown")
         sent_at = envelope.get("sent_at")
         payload = envelope.get("payload")
         if not isinstance(payload, dict):

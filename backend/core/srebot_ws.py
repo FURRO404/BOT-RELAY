@@ -104,7 +104,7 @@ async def listen_channel(channel: str) -> None:
                         continue
                     if not isinstance(envelope, dict):
                         continue
-                    await store.add(envelope)
+                    await store.add(envelope, channel=channel)
                     _log_batch(envelope, len(raw_bytes))
         except asyncio.CancelledError:
             raise
