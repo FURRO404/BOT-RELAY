@@ -1,12 +1,12 @@
 """
-WebSocket client that connects to SREBOT's external bridge and feeds
-received envelopes into the local in-memory store.
+WebSocket client that connects to the relay gateway's push channels and
+feeds received envelopes into the local in-memory store.
 
-Derives the connection URL from SREBOT_WS_URL if set, otherwise converts
-SREBOT_API_BASE_URL (http/https) to a ws/wss URL and appends /ws/srebot.
-Reconnects with exponential back-off on any error.
+`listen_all()` discovers the granted channels via GET /api/whoami, then runs
+one `listen_channel(channel)` task per channel (`sqb`/`tss`), deriving each
+ws URL from RELAY_GATEWAY_URL. Reconnects with exponential back-off on error.
 
-SREBOT broadcasts envelopes as zstd-compressed binary frames. The
+The gateway broadcasts envelopes as zstd-compressed binary frames. The
 decompressor tries zstd first and falls back to plain UTF-8 so the
 client survives if an uncompressed frame ever arrives.
 """
@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 from websockets.asyncio.client import connect as wsconnect
 
 from backend.core.srebot_store import store
+from backend.core.gateway_client import whoami, ws_url_for
 
 load_dotenv()
 
@@ -55,41 +56,40 @@ def _log_batch(envelope: dict, wire_bytes: int) -> None:
         )
 
 
-def _ws_url() -> str:
-    explicit = os.getenv("SREBOT_WS_URL", "").strip()
-    if explicit:
-        return explicit
-    http = os.getenv("SREBOT_API_BASE_URL", "").strip().rstrip("/")
-    if http:
-        return http.replace("https://", "wss://").replace("http://", "ws://") + "/ws/srebot"
-    return ""
-
-
 def _auth_headers() -> dict[str, str]:
-    token = os.getenv("SREBOT_API_BEARER_TOKEN", "").strip()
+    token = os.getenv("RELAY_TOKEN", "").strip()
     if token:
         return {"Authorization": f"Bearer {token}"}
     return {}
 
 
-async def listen_forever() -> None:
-    url = _ws_url()
-    if not url:
-        logger.error(
-            "SREBOT WS URL not configured — set SREBOT_WS_URL or SREBOT_API_BASE_URL"
-        )
+async def listen_all() -> None:
+    """Discover channels from the gateway, then listen on each concurrently."""
+    try:
+        grant = await whoami()
+        channels = list(grant.get("channels") or [])
+    except Exception as exc:
+        logger.error("whoami failed: %s — relay idle", exc)
         return
+    if not channels:
+        logger.error("No channels granted; relay idle")
+        return
+    logger.info("Subscribing to channels: %s", channels)
+    await asyncio.gather(*(listen_channel(c) for c in channels))
 
+
+async def listen_channel(channel: str) -> None:
+    url = ws_url_for(channel)
     reconnect_delay = 1.0
     while True:
         try:
-            logger.info("Connecting to SREBOT WS %s", url)
+            logger.info("[%s] connecting to %s", channel, url)
             async with wsconnect(
                 url,
                 additional_headers=_auth_headers(),
                 max_size=32 * 1024 * 1024,
             ) as ws:
-                logger.info("SREBOT WS connected")
+                logger.info("[%s] connected", channel)
                 reconnect_delay = 1.0
                 async for message in ws:
                     raw_bytes = message.encode("utf-8") if isinstance(message, str) else bytes(message)
@@ -100,7 +100,7 @@ async def listen_forever() -> None:
                     try:
                         envelope = json.loads(text)
                     except json.JSONDecodeError:
-                        logger.warning("Malformed JSON from SREBOT WS, skipping")
+                        logger.warning("[%s] malformed JSON, skipping", channel)
                         continue
                     if not isinstance(envelope, dict):
                         continue
@@ -110,7 +110,7 @@ async def listen_forever() -> None:
             raise
         except Exception as exc:
             logger.warning(
-                "SREBOT WS disconnected: %s — reconnecting in %.0fs", exc, reconnect_delay
+                "[%s] disconnected: %s — reconnecting in %.0fs", channel, exc, reconnect_delay
             )
 
         await asyncio.sleep(reconnect_delay)

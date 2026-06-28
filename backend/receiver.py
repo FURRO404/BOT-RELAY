@@ -19,16 +19,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from backend.api.srebot_bridge import get_router
-from backend.core.srebot_ws import listen_forever
+from backend.core.srebot_ws import listen_all
 
 load_dotenv()
 
 
 class ReceiverSettings:
     def __init__(self) -> None:
-        self.host = os.getenv("AXBOT_RECEIVER_HOST", "0.0.0.0")
-        self.port = int(os.getenv("AXBOT_RECEIVER_PORT", "18081"))
-        self.receiver_bearer_token = os.getenv("SREBOT_API_BEARER_TOKEN", "")
+        self.host = os.getenv("BOT_RELAY_RECEIVER_HOST", "0.0.0.0")
+        self.port = int(os.getenv("BOT_RELAY_RECEIVER_PORT", "18082"))
+        self.receiver_bearer_token = os.getenv("RELAY_TOKEN", "")
 
 
 @lru_cache(maxsize=1)
@@ -41,7 +41,7 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    task = asyncio.create_task(listen_forever())
+    task = asyncio.create_task(listen_all())
     try:
         yield
     finally:
@@ -53,7 +53,7 @@ async def lifespan(_: FastAPI):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="AXBot SREBOT Receiver", version="1.0.0", lifespan=lifespan)
+    app = FastAPI(title="BOT-RELAY Receiver", version="1.0.0", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

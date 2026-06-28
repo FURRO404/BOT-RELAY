@@ -73,37 +73,44 @@ class SREBOTEventStore:
             self._latest_by_type[event_type] = record
             return record
 
-    async def list(self, event_type: Optional[str] = None, limit: int = 100) -> list[SREBOTEnvelope]:
-        """Return the newest records first."""
+    async def list(self, source: Optional[str] = None, event_type: Optional[str] = None, limit: int = 100) -> list[SREBOTEnvelope]:
+        """Return the newest records first, optionally filtered by source/type."""
         async with self._lock:
             events = list(self._events)
 
+        if source:
+            events = [event for event in events if event.source == source]
         if event_type:
             events = [event for event in events if event.event_type == event_type]
         if limit > 0:
             events = events[-limit:]
         return list(reversed(events))
 
-    async def latest(self, event_type: Optional[str] = None) -> Optional[SREBOTEnvelope]:
-        """Return the newest record, optionally filtered by type."""
+    async def latest(self, source: Optional[str] = None, event_type: Optional[str] = None) -> Optional[SREBOTEnvelope]:
+        """Return the newest record, optionally filtered by source/type."""
         async with self._lock:
-            if event_type:
-                return self._latest_by_type.get(event_type)
-            if not self._events:
-                return None
-            return self._events[-1]
+            candidates = list(self._events)
+        if source:
+            candidates = [event for event in candidates if event.source == source]
+        if event_type:
+            candidates = [event for event in candidates if event.event_type == event_type]
+        return candidates[-1] if candidates else None
 
-    async def stats(self) -> dict[str, Any]:
-        """Return basic store statistics for debugging."""
+    async def stats(self, source: Optional[str] = None) -> dict[str, Any]:
+        """Return basic store statistics for debugging, optionally per source."""
         async with self._lock:
-            counts: dict[str, int] = {}
-            for event in self._events:
-                counts[event.event_type] = counts.get(event.event_type, 0) + 1
-            return {
-                "total_events": len(self._events),
-                "event_types": counts,
-                "latest_event_id": self._counter,
-            }
+            events = list(self._events)
+            counter = self._counter
+        if source:
+            events = [event for event in events if event.source == source]
+        counts: dict[str, int] = {}
+        for event in events:
+            counts[event.event_type] = counts.get(event.event_type, 0) + 1
+        return {
+            "total_events": len(events),
+            "event_types": counts,
+            "latest_event_id": counter,
+        }
 
 
 store = SREBOTEventStore()
