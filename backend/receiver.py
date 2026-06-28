@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from backend.api.srebot_bridge import get_router
-from backend.core.srebot_ws import listen_forever
+from backend.core.srebot_ws import listen_all
 
 load_dotenv()
 
@@ -41,7 +41,7 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    task = asyncio.create_task(listen_forever())
+    task = asyncio.create_task(listen_all())
     try:
         yield
     finally:
