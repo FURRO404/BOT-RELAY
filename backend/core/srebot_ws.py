@@ -27,7 +27,7 @@ from backend.core.gateway_client import whoami, ws_url_for
 
 load_dotenv()
 
-logger = logging.getLogger("axbot-srebot-ws")
+logger = logging.getLogger("bot-relay-ws")
 
 _decompressor = zstd.ZstdDecompressor()
 

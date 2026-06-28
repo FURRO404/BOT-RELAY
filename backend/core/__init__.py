@@ -1,2 +1,2 @@
-"""Core utilities for AXBot."""
+"""Core utilities for BOT-RELAY."""
 

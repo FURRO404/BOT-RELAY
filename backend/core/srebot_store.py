@@ -1,7 +1,7 @@
 """
 In-memory storage for data received from SREBOT.
 
-The receiver keeps the raw envelopes so other AXBot code can query the latest
+The receiver keeps the raw envelopes so other BOT-RELAY code can query the latest
 payloads without needing direct access to SREBOT's storage.
 """
 

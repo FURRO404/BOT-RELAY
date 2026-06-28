@@ -6,7 +6,7 @@ fonts) are **not included** in this repository.
 
 ## What you need
 
-The renderer expects the following layout under `$AXBOT_SCOREBOARD_ASSETS_DIR`
+The renderer expects the following layout under `$BOT_RELAY_SCOREBOARD_ASSETS_DIR`
 (or this directory):
 
 - `MAPS/*.jpg` — map background images, keyed by map internal name
@@ -36,5 +36,5 @@ The renderer expects the following layout under `$AXBOT_SCOREBOARD_ASSETS_DIR`
 If you keep the assets elsewhere, point the renderer at them:
 
 ```bash
-export AXBOT_SCOREBOARD_ASSETS_DIR=/path/to/your/assets
+export BOT_RELAY_SCOREBOARD_ASSETS_DIR=/path/to/your/assets
 ```

@@ -1,7 +1,7 @@
 """
 update_game_files.py
 
-Refreshes AXBot's bundled game data from upstream War Thunder sources:
+Refreshes BOT-RELAY's bundled game data from upstream War Thunder sources:
 
 1. Copies the two `.vromfs.bin` files (char + lang) from the local War Thunder
    Steam install into `src/assets/`. These feed `src.data_parser` for vehicle
@@ -36,7 +36,7 @@ GITHUB_TREE_URL = "https://api.github.com/repos/gszabi99/War-Thunder-Datamine/gi
 RAW_BASE_URL = "https://raw.githubusercontent.com/gszabi99/War-Thunder-Datamine/master/"
 VEHICLE_ATLAS_PATH = "atlases.vromfs.bin_u/units/"
 MAX_CONCURRENT = 50
-HEADERS = {"User-Agent": "AXBotGameFilesUpdater/1.0"}
+HEADERS = {"User-Agent": "BOT-RELAYGameFilesUpdater/1.0"}
 
 VROMFS_FILES = ["char.vromfs.bin", "lang.vromfs.bin"]
 

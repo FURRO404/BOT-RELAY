@@ -243,7 +243,7 @@ class _LangCSVBase:
 
         Args:
             language: Language column name (e.g. ``"English"``).
-                AXBot defaults to Simplified Chinese (``"<Chinese>"``).
+                BOT-RELAY defaults to Simplified Chinese (``"<Chinese>"``).
         """
         self.index = 0
         self.update_language(language)

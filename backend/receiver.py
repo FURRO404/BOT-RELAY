@@ -1,5 +1,5 @@
 """
-Standalone AXBot receiver service.
+Standalone BOT-RELAY receiver service.
 
 Connects to SREBOT's external bridge WebSocket and stores received envelopes
 in memory. Also exposes HTTP endpoints for querying the store and proxying

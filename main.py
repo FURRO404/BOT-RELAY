@@ -1,4 +1,4 @@
-"""AXBot receiver entry point."""
+"""BOT-RELAY receiver entry point."""
 
 from __future__ import annotations
 

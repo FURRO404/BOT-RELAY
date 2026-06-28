@@ -1,2 +1,2 @@
-"""API modules for AXBot."""
+"""API modules for BOT-RELAY."""
 

@@ -1,6 +1,6 @@
 """
-Hit every SREBOT endpoint that AXBot wraps in backend/core/srebot_client.py,
-plus AXBot's own receiver endpoints, and save each response to its own JSON
+Hit every SREBOT endpoint that BOT-RELAY wraps in backend/core/srebot_client.py,
+plus BOT-RELAY's own receiver endpoints, and save each response to its own JSON
 file under tests/results/ as `test_<stem>.json`.
 
 Out of scope on purpose:

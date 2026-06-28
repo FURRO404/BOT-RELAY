@@ -1,7 +1,7 @@
 """
 Formal HTTP client for querying the SREBOT API.
 
-AXBot can use this module to fetch normalized player, match, leaderboard, and
+BOT-RELAY can use this module to fetch normalized player, match, leaderboard, and
 replay data from SREBOT without touching SREBOT's storage.
 """
 

@@ -1,2 +1,2 @@
-"""AXBot backend package."""
+"""BOT-RELAY backend package."""
 
