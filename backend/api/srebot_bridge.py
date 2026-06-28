@@ -45,31 +45,4 @@ def get_router() -> APIRouter:
             "events": [event.to_dict() for event in events],
         }
 
-    @router.websocket("/ws/srebot")
-    async def srebot_websocket(websocket: WebSocket) -> None:
-        from backend.receiver import settings
-
-        if settings.receiver_bearer_token:
-            auth = websocket.headers.get("authorization", "")
-            if auth != f"Bearer {settings.receiver_bearer_token}":
-                await websocket.close(code=1008)
-                return
-
-        await websocket.accept()
-
-        try:
-            while True:
-                raw = await websocket.receive_text()
-                try:
-                    envelope = json.loads(raw)
-                except json.JSONDecodeError:
-                    continue
-
-                if not isinstance(envelope, dict):
-                    continue
-
-                await store.add(envelope)
-        except WebSocketDisconnect:
-            return
-
     return router
